@@ -1,7 +1,7 @@
 import keyboard
 from typing import Callable
 from utils.custom_mouse import mouse
-from char import IChar
+from char import IChar, CharacterCapabilities
 import template_finder
 from pather import Pather
 from screen import grab
@@ -11,10 +11,51 @@ from pather import Pather
 from config import Config
 from ui_manager import ScreenObjects, is_visible
 
+from ui import skills
+import random
+from logger import Logger
+from screen import convert_abs_to_screen, convert_abs_to_monitor
+from item.pickit import PickIt #for Diablo
+
 class Sorceress(IChar):
-    def __init__(self, skill_hotkeys: dict, pather: Pather):
+    def __init__(self, skill_hotkeys: dict, pather: Pather, pickit: PickIt):
         super().__init__(skill_hotkeys)
         self._pather = pather
+        self._pickit = pickit
+        self._picked_up_items = False #for Diablo
+
+    def pre_buff(self):
+        if Config().char["cta_available"]:
+            self._pre_buff_cta()
+        if self._skill_hotkeys["energy_shield"]:
+            keyboard.send(self._skill_hotkeys["energy_shield"])
+            wait(0.1, 0.13)
+            mouse.click(button="right")
+            wait(self._cast_duration)
+        if self._skill_hotkeys["thunder_storm"]:
+            keyboard.send(self._skill_hotkeys["thunder_storm"])
+            wait(0.1, 0.13)
+            mouse.click(button="right")
+            wait(self._cast_duration)
+        if self._skill_hotkeys["frozen_armor"]:
+            keyboard.send(self._skill_hotkeys["frozen_armor"])
+            wait(0.1, 0.13)
+            mouse.click(button="right")
+            wait(self._cast_duration)
+
+    def _click_cast(self, cast_pos_abs: tuple[float, float], spray: int, mouse_click_type: str = "left"):
+        if cast_pos_abs:
+            x = cast_pos_abs[0]
+            y = cast_pos_abs[1]
+            if spray:
+                x += (random.random() * 2 * spray - spray)
+                y += (random.random() * 2 * spray - spray)
+            pos_m = convert_abs_to_monitor((x, y))
+            mouse.move(*pos_m, delay_factor=[0.1, 0.2])
+            wait(0.06, 0.08)
+        mouse.press(button = mouse_click_type)
+        wait(0.06, 0.08)
+        mouse.release(button = mouse_click_type)
 
     def pick_up_item(self, pos: tuple[float, float], item_name: str = None, prev_cast_start: float = 0):
         if self._skill_hotkeys["telekinesis"] and any(x in item_name for x in ['potion', 'misc_gold', 'tp_scroll']):
@@ -64,25 +105,6 @@ class Sorceress(IChar):
                         return True
         # In case telekinesis fails, try again with the base implementation
         return super().select_by_template(template_type, success_func, timeout, threshold)
-
-    def pre_buff(self):
-        if Config().char["cta_available"]:
-            self._pre_buff_cta()
-        if self._skill_hotkeys["energy_shield"]:
-            keyboard.send(self._skill_hotkeys["energy_shield"])
-            wait(0.1, 0.13)
-            mouse.click(button="right")
-            wait(self._cast_duration)
-        if self._skill_hotkeys["thunder_storm"]:
-            keyboard.send(self._skill_hotkeys["thunder_storm"])
-            wait(0.1, 0.13)
-            mouse.click(button="right")
-            wait(self._cast_duration)
-        if self._skill_hotkeys["frozen_armor"]:
-            keyboard.send(self._skill_hotkeys["frozen_armor"])
-            wait(0.1, 0.13)
-            mouse.click(button="right")
-            wait(self._cast_duration)
 
     def _cast_static(self, duration: float = 1.4):
         if self._skill_hotkeys["static_field"]:

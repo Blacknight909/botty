@@ -22,7 +22,8 @@ from char import IChar
 from item.pickit import PickIt
 from item import consumables
 from pather import Pather, Location
-from char.sorceress import LightSorc, BlizzSorc, NovaSorc,HydraSorc
+#from char.sorceress import LightSorc, BlizzSorc, NovaSorc,HydraSorc
+from char.sorceress import BlizzSorc
 from char.trapsin import Trapsin
 from char.paladin.hammerdin import Hammerdin
 from char.paladin import FoHdin
@@ -54,7 +55,7 @@ class Bot:
             case "sorceress" | "light_sorc":
                 self._char: IChar = LightSorc(Config().light_sorc, self._pather)
             case "blizz_sorc":
-                self._char: IChar = BlizzSorc(Config().blizz_sorc, self._pather)
+                self._char: IChar = BlizzSorc(Config().blizz_sorc, self._pather, self._pickit)
             case "nova_sorc":
                 self._char: IChar = NovaSorc(Config().nova_sorc, self._pather)
             case "hydra_sorc":

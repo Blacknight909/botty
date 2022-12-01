@@ -77,9 +77,6 @@ class GameStats:
             self._location_stats[self._location]["chickens"] += 1
             self._location_stats["totals"]["chickens"] += 1
 
-        if Config().general["discord_log_chicken"] and self._messenger.enabled:
-            self._messenger.send_chicken(self._location, img)
-
     def log_merc_death(self):
         self._merc_death_counter += 1
         if self._location is not None:
@@ -89,9 +86,6 @@ class GameStats:
     def log_start_game(self):
         if self._game_counter > 0:
             self._save_stats_to_file()
-            if Config().general["discord_status_count"] and self._game_counter % Config().general["discord_status_count"] == 0:
-                # every discord_status_count game send a message update about current status
-                self._send_status_update()
         self._game_counter += 1
         self._timer = time.time()
         Logger.info(f"Starting game #{self._game_counter}")
